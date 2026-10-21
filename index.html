@@ -1,13 +1,415 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="th">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐉</text></svg>" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>มหายุทธภพกิมย้ง: ปราณเรียลไทม์ (Jin Yong: ATB War)</title>
-  </head>
-  <body class="bg-slate-950 text-slate-100 overflow-x-hidden">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ATB War</title>
+  <meta name="description" content="เกม 3v3 ATB Turn-based RPG จากนิยายกิมย้ง">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=sw_epic_overhaul_v2">
+  <!-- Reicon: Official SVG Icons Ecosystem for Web Components -->
+  <script src="https://cdn.jsdelivr.net/npm/reicon/cdn/reicon.min.js"></script>
+</head>
+
+<body>
+  <div id="app">
+
+    <!-- Landscape Orientation Warning (for narrow portrait mobile) -->
+    <div id="rotate-device-prompt" class="rotate-device-prompt">
+      <div class="rotate-icon"><re-icon icon="arrows-rotate" size="36" color="#f39c12"></re-icon></div>
+      <h3>กรุณาหมุนจอเป็นแนวนอน (Landscape Mode)</h3>
+      <p>เกมนี้ออกแบบมาให้เล่นในแนวนอนเพื่อมุมมองสนามรบ 3v3 และเอฟเฟกต์เต็มจอ</p>
+      <button id="btn-dismiss-rotate" class="btn-small-gold">เล่นต่อมุมมองนี้</button>
+    </div>
+
+    <!-- ═══════════════ LOBBY (SUMMONERS WAR SKY ISLAND) ═══════════════ -->
+    <div id="screen-lobby" class="screen active sw-lobby">
+      <!-- Summoners War Top Profile & Currencies Bar -->
+      <header class="sw-top-bar">
+        <!-- Player Profile -->
+        <div class="sw-player-profile">
+          <div class="sw-avatar-ring">
+            <img src="/assets/guo_jing.jpg" alt="Summoner" class="sw-avatar-img">
+            <span class="sw-player-lvl">50</span>
+          </div>
+          <div class="sw-player-info">
+            <span class="sw-player-name">จอมยุทธสะท้านฟ้า</span>
+            <div class="sw-exp-bar">
+              <div class="sw-exp-fill" style="width: 78%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Currencies Bar with Reicon Icons -->
+        <div class="sw-currencies">
+          <div class="sw-cur-item sw-energy" title="พลังงานยุทธภพ">
+            <span class="sw-cur-icon"><re-icon icon="flash" weight="filled" size="18" color="#f1c40f"></re-icon></span>
+            <span class="sw-cur-val">190/190</span>
+            <button class="sw-cur-plus"><re-icon icon="add" weight="outline" size="12" color="#f9e79f"></re-icon></button>
+          </div>
+          <div class="sw-cur-item sw-glory" title="ปีกประลองยุทธ">
+            <span class="sw-cur-icon"><re-icon icon="medal" weight="filled" size="18" color="#e74c3c"></re-icon></span>
+            <span class="sw-cur-val">10/10</span>
+            <button class="sw-cur-plus"><re-icon icon="add" weight="outline" size="12" color="#f9e79f"></re-icon></button>
+          </div>
+          <div class="sw-cur-item sw-mana" title="มานาสโตน">
+            <span class="sw-cur-icon"><re-icon icon="coin" weight="filled" size="18" color="#3498db"></re-icon></span>
+            <span class="sw-cur-val" id="lobby-gold">2,850,400</span>
+            <button class="sw-cur-plus"><re-icon icon="add" weight="outline" size="12" color="#f9e79f"></re-icon></button>
+          </div>
+          <div class="sw-cur-item sw-crystal" title="คริสตัล">
+            <span class="sw-cur-icon"><re-icon icon="gem" weight="filled" size="18" color="#9b59b6"></re-icon></span>
+            <span class="sw-cur-val" id="lobby-fragments">1,250</span>
+            <button class="sw-cur-plus"><re-icon icon="add" weight="outline" size="12" color="#f9e79f"></re-icon></button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Center Sky Island Arena Stage with Main Heroes -->
+      <div class="sw-island-center">
+        <!-- Sky Island Stage Plaque -->
+        <div class="sw-island-title">
+          <span class="sw-ribbon-text"><re-icon icon="flag" weight="filled" size="16" color="#f39c12" style="margin-right:6px;"></re-icon>ฐานทัพลานประลองยุทธสวรรค์</span>
+        </div>
+
+        <!-- 3 Defense/Battle Heroes on Pedestals -->
+        <div class="sw-pedestals-container" id="team-slots">
+          <div class="sw-pedestal team-slot" data-slot="0">
+            <div class="sw-pedestal-base"></div>
+          </div>
+          <div class="sw-pedestal team-slot" data-slot="1">
+            <div class="sw-pedestal-base"></div>
+          </div>
+          <div class="sw-pedestal team-slot" data-slot="2">
+            <div class="sw-pedestal-base"></div>
+          </div>
+        </div>
+
+        <!-- Monster Storage Quick Grid -->
+        <div class="sw-roster-drawer">
+          <div class="sw-drawer-header">
+            <span class="sw-drawer-title"><re-icon icon="document" weight="filled" size="16" color="#f39c12" style="margin-right:6px;"></re-icon>ยอดยุทธในครอบครอง (Monsters)</span>
+          </div>
+          <div id="character-roster" class="sw-roster-grid"></div>
+        </div>
+      </div>
+
+      <!-- Summoners War Iconic Bottom Menu Dock with Reicon Icons -->
+      <nav class="sw-bottom-dock">
+        <div class="sw-dock-left">
+          <button class="sw-dock-btn" data-goto="trial" id="btn-goto-trial">
+            <span class="sw-dock-icon"><re-icon icon="activity" weight="filled" size="24" color="#f39c12"></re-icon></span>
+            <span class="sw-dock-label">ห้องซ้อม Dummy</span>
+          </button>
+          <button class="sw-dock-btn" data-goto="campaign">
+            <span class="sw-dock-icon"><re-icon icon="book" weight="filled" size="24" color="#f39c12"></re-icon></span>
+            <span class="sw-dock-label">คัมภีร์ยุทธ</span>
+          </button>
+          <button class="sw-dock-btn" data-goto="summon">
+            <span class="sw-dock-icon"><re-icon icon="sparkle" weight="filled" size="24" color="#f39c12"></re-icon></span>
+            <span class="sw-dock-label">แท่นอัญเชิญ</span>
+          </button>
+        </div>
+
+        <!-- Giant BATTLE Button (Iconic Summoners War Bottom-Right) -->
+        <button class="sw-big-battle-btn" data-goto="trial" title="เข้าสู่สนามประลอง">
+          <div class="sw-battle-glow"></div>
+          <span class="sw-battle-icon"><re-icon icon="sword" weight="filled" size="34" color="#ffeaa7"></re-icon></span>
+          <span class="sw-battle-text">BATTLE</span>
+          <span class="sw-battle-sub">ประลองยุทธ</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- ═══════════════ TRIAL / TRAINING SETUP (SUMMONERS WAR BATTLE PREP) ═══════════════ -->
+    <div id="screen-trial" class="screen sw-trial-screen">
+      <header class="sw-header-bar">
+        <button class="sw-btn-back" data-goto="lobby"><re-icon icon="arrow-left" size="16" style="margin-right:6px;"></re-icon>หน้าหลัก</button>
+        <div class="sw-header-title">
+          <h1><re-icon icon="activity" weight="filled" size="20" color="#f39c12" style="margin-right:8px;"></re-icon>ห้องจัดทีมทดสอบ (Battle Preparation)</h1>
+        </div>
+      </header>
+
+      <div class="trial-container sw-prep-container">
+        <!-- Left Column: Team Formation & Monster Roster Picker -->
+        <div class="sw-prep-left">
+          <!-- Team Trial Selection -->
+          <section class="trial-section sw-panel-box sw-prep-team-box">
+            <div class="section-header-row">
+              <h2 class="section-title sw-box-title"><re-icon icon="shield" weight="filled" size="18" color="#f39c12" style="margin-right:6px;"></re-icon>จัดทีมทดสอบ (3 ตำแหน่ง)</h2>
+              <button class="btn-small-gold sw-btn-action" id="btn-quick-fill-team">จัดเต็มทีมอัตโนมัติ</button>
+            </div>
+            <div class="trial-team-slots sw-team-slots" id="trial-team-slots">
+              <div class="trial-slot empty" data-slot="0">
+                <span class="trial-slot-title">ตำแหน่ง 1 (ตัวหน้า)</span>
+                <div class="slot-content">แตะเพื่อเลือก</div>
+              </div>
+              <div class="trial-slot empty" data-slot="1">
+                <span class="trial-slot-title">ตำแหน่ง 2 (ตัวกลาง)</span>
+                <div class="slot-content">แตะเพื่อเลือก</div>
+              </div>
+              <div class="trial-slot empty" data-slot="2">
+                <span class="trial-slot-title">ตำแหน่ง 3 (ตัวหลัง)</span>
+                <div class="slot-content">แตะเพื่อเลือก</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Available Heroes to Pick -->
+          <section class="trial-section sw-panel-box sw-prep-roster-box">
+            <h2 class="section-title sw-box-title"><re-icon icon="profile" weight="filled" size="18" color="#f39c12" style="margin-right:6px;"></re-icon>เลือกจอมยุทธลงทีม (Monsters)</h2>
+            <div id="trial-roster-list" class="trial-roster-grid sw-roster-grid"></div>
+          </section>
+        </div>
+
+        <!-- Right Column: Dummy Arena Configuration & Start Battle -->
+        <div class="sw-prep-right">
+          <!-- Dummy Arena Configuration -->
+          <section class="trial-section sw-panel-box sw-prep-dummy-box">
+            <h2 class="section-title sw-box-title"><re-icon icon="target" weight="filled" size="18" color="#e74c3c" style="margin-right:6px;"></re-icon>ตั้งค่าเป้าซ้อม (Training Dummy)</h2>
+            <div class="dummy-config-card sw-card-inner">
+              <div class="dummy-preview-box">
+                <img src="/assets/dummy.png?v=2" class="dummy-preview-img" alt="Dummy">
+                <div class="dummy-preview-info">
+                  <span class="dummy-title">หุ่นไม้ฝึกวิชา (Mook Yan Jong)</span>
+                  <span class="dummy-desc">เป้าทดสอบดาเมจ, ดีบัฟ, และการคอมโบสกิล</span>
+                </div>
+              </div>
+
+              <div class="config-row">
+                <label class="config-label">จำนวนเป้าหมาย:</label>
+                <div class="config-options" id="opt-dummy-count">
+                  <button class="cfg-btn active sw-cfg-btn" data-count="1">เป้าเดี่ยว (1 หุ่น)</button>
+                  <button class="cfg-btn sw-cfg-btn" data-count="3">เป้าหมู่ (3 หุ่น)</button>
+                </div>
+              </div>
+
+              <div class="config-row">
+                <label class="config-label">ประเภทหุ่นซ้อม:</label>
+                <div class="config-options" id="opt-dummy-type">
+                  <button class="cfg-btn active sw-cfg-btn" data-count="immortal" data-type="immortal">🪵 อมตะ (ไม่ตาย)</button>
+                  <button class="cfg-btn sw-cfg-btn" data-count="standard" data-type="standard">🛡️ มาตรฐาน (15,000 HP)</button>
+                  <button class="cfg-btn sw-cfg-btn" data-count="armored" data-type="armored">🦾 เกราะเหล็ก (DEF สูง)</button>
+                </div>
+              </div>
+
+              <div class="config-row">
+                <label class="config-label">การตอบโต้ของหุ่น:</label>
+                <div class="config-options" id="opt-dummy-action">
+                  <button class="cfg-btn active sw-cfg-btn" data-action="pass">🛑 ยืนนิ่ง (ไม่ตอบโต้)</button>
+                  <button class="cfg-btn sw-cfg-btn" data-action="counter">🥊 สวนกลับเบาๆ</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Start Practice Button -->
+          <div class="trial-action-bar sw-action-dock">
+            <button id="btn-start-trial" class="sw-big-battle-btn sw-start-battle-btn">
+              <span class="sw-battle-icon"><re-icon icon="sword" weight="filled" size="34" color="#ffeaa7"></re-icon></span>
+              <span class="sw-battle-text">BATTLE START</span>
+              <span class="sw-battle-sub">เริ่มประลองยุทธ</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ BATTLE (SUMMONERS WAR SKY ARENA) ═══════════════ -->
+    <div id="screen-battle" class="screen sw-battle-screen">
+      <!-- Top Summoners War Battle Controls HUD with Reicon Icons -->
+      <div class="sw-battle-top-hud">
+        <!-- Left: Action Speed / Auto / Pause Buttons -->
+        <div class="sw-battle-controls">
+          <button class="sw-btn-circle btn-flee" id="btn-flee" title="ยอมแพ้ / ออกจากการต่อสู้">
+            <re-icon icon="logout" weight="outline" size="16" color="#ff7675"></re-icon>
+          </button>
+          <button class="sw-btn-circle" id="btn-battle-auto" title="เปิด/ปิด การต่อสู้อัตโนมัติ">
+            <re-icon icon="play" weight="filled" size="12" color="#55efc4" style="margin-right:2px;"></re-icon>
+            <span class="sw-btn-text">AUTO</span>
+          </button>
+          <button class="sw-btn-circle btn-speed-toggle" id="btn-battle-speed" title="ปรับความเร็วการต่อสู้">
+            <re-icon icon="forward" weight="filled" size="12" color="#ffeaa7" style="margin-right:2px;"></re-icon>
+            <span class="sw-btn-text">1x</span>
+          </button>
+          <button class="sw-btn-circle btn-pause-toggle" id="btn-battle-pause" title="หยุดเวลาชั่วคราว">
+            <re-icon icon="pause" weight="filled" size="16" color="#dfe6e9"></re-icon>
+          </button>
+          <button class="sw-btn-circle sw-btn-tools" id="btn-toggle-sandbox" title="เครื่องมือทดสอบ Sandbox">
+            <re-icon icon="sliders" weight="filled" size="16" color="#f39c12"></re-icon>
+          </button>
+        </div>
+
+        <!-- Center: Stage Name Banner -->
+        <div class="sw-stage-banner">
+          <div class="sw-banner-wings"></div>
+          <span class="sw-banner-title" id="battle-stage-name"><re-icon icon="activity" weight="filled" size="16" color="#f39c12" style="margin-right:6px;"></re-icon>หอฝึกยุทธ (Practice Arena)</span>
+        </div>
+
+        <!-- Right: Live DPS Meter Bar -->
+        <div class="sw-dps-badge" id="dps-meter-bar">
+          <span class="sw-dps-txt">DPS: <b id="dps-total">0</b></span>
+          <span class="sw-dps-crit">CRIT: <b id="dps-max-hit">0</b></span>
+          <button class="sw-dps-reset" id="btn-clear-dps" title="ล้างสถิติ"><re-icon icon="refresh-2" size="12"></re-icon></button>
+        </div>
+      </div>
+
+      <!-- Collapsible Sandbox Utility Bar -->
+      <div id="sandbox-bar" class="sw-sandbox-tray hidden">
+        <button class="sw-tray-btn" id="sb-reset-dummy"><span><re-icon icon="refresh-2" size="14" style="margin-right:4px;"></re-icon>รีเซ็ตหุ่น</span></button>
+        <button class="sw-tray-btn" id="sb-max-qi"><span><re-icon icon="flash" weight="filled" size="14" color="#f1c40f" style="margin-right:4px;"></re-icon>ชี่เต็ม 100</span></button>
+        <button class="sw-tray-btn" id="sb-reset-cd"><span><re-icon icon="redo" size="14" style="margin-right:4px;"></re-icon>รีเซ็ต CD</span></button>
+        <button class="sw-tray-btn" id="sb-gain-turn"><span><re-icon icon="forward" weight="filled" size="14" color="#3498db" style="margin-right:4px;"></re-icon>เร่งเทิร์น</span></button>
+      </div>
+
+      <!-- Target Selection Prompt Banner -->
+      <div id="target-prompt-banner" class="target-prompt-banner hidden">
+        <span class="prompt-icon"><re-icon icon="target" weight="filled" size="18" color="#e74c3c"></re-icon></span>
+        <span class="prompt-text">คลิกที่หุ่นไม้เพื่อโจมตี!</span>
+      </div>
+
+      <!-- Summoners War 3D Isometric Battle Stage -->
+      <div class="sw-arena-stage">
+        <!-- Allied Heroes Side (Left Stage) -->
+        <div class="sw-team-side player-side" id="player-side">
+          <!-- Player units rendered dynamically with Floating HP/ATB Bars -->
+        </div>
+
+        <!-- Combat Log (Bottom Center Overlay) -->
+        <div class="sw-combat-log-container">
+          <div id="battle-log" class="sw-battle-log"></div>
+        </div>
+
+        <!-- Enemy / Dummy Side (Right Stage) -->
+        <div class="sw-team-side enemy-side" id="enemy-side">
+          <!-- Dummy unit rendered dynamically with Floating HP/ATB Bars -->
+        </div>
+      </div>
+
+      <!-- Summoners War Skill HUD (Bottom-Right Circular Skill Dock) -->
+      <div id="move-panel" class="sw-skill-hud hidden">
+        <!-- Active Character Indicator & Qi Gem -->
+        <div class="sw-active-char-ribbon">
+          <div class="sw-ribbon-portrait-box">
+            <span id="active-char-elem" class="char-elem-badge"></span>
+            <span id="active-char-name">ก๊วยเจ๋ง</span>
+          </div>
+          <div class="sw-qi-orb">
+            <span id="active-char-qi">ชี่: 100</span>
+          </div>
+        </div>
+
+        <!-- 4 Circular Skill Buttons -->
+        <div class="sw-skill-buttons" id="move-buttons">
+          <!-- Rendered dynamically with real PNG icons in circular gold frames -->
+        </div>
+
+        <!-- Skill Tooltip (Floating above skill dock) -->
+        <div id="skill-tooltip" class="sw-skill-tooltip">
+          แตะหรือชี้ที่สกิลเพื่อดูคำอธิบายและผลลัพธ์
+        </div>
+      </div>
+
+      <div id="target-panel" class="target-panel hidden">
+        <div class="target-header">🎯 เลือกเป้าหมายหุ่นซ้อม</div>
+        <div id="target-buttons" class="target-buttons"></div>
+        <button class="btn-cancel-target" id="btn-cancel-target">ยกเลิก</button>
+      </div>
+
+      <!-- Summoners War Victory / Defeat Modal -->
+      <div id="battle-result" class="battle-result sw-result-modal hidden">
+        <div class="sw-result-box">
+          <div class="sw-result-header">
+            <h2 id="result-title" class="victory">VICTORY</h2>
+          </div>
+          <div class="sw-result-body" id="result-rewards"></div>
+          <button id="btn-result-continue" class="sw-btn-gold">ตกลง</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ CAMPAIGN ═══════════════ -->
+    <div id="screen-campaign" class="screen">
+      <header class="screen-header">
+        <button class="btn-back" data-goto="lobby">← กลับ</button>
+        <h1>⚔️ ด่านยุทธภพ</h1>
+        <div class="difficulty-selector">
+          <button class="diff-btn active" data-diff="normal">ปกติ</button>
+          <button class="diff-btn" data-diff="hard">ยาก</button>
+          <button class="diff-btn" data-diff="hell">นรก</button>
+        </div>
+      </header>
+      <div class="chapter-container">
+        <h2 class="chapter-title" id="chapter-title">บทที่ 1: เมืองเหยี่ยว้าว</h2>
+        <div id="stage-list" class="stage-list"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ SUMMON ═══════════════ -->
+    <div id="screen-summon" class="screen">
+      <header class="screen-header">
+        <button class="btn-back" data-goto="lobby">← กลับ</button>
+        <h1>🎴 ศาลาอัญเชิญ</h1>
+        <span class="gold-display">🪙 <span class="gold-amount-sync">0</span> ตำลึง</span>
+      </header>
+
+      <div class="summon-area">
+        <div class="summon-altar" id="summon-altar">
+          <div class="altar-glow"></div>
+          <div class="altar-text">กดอัญเชิญเพื่อเรียกยอดยุทธ</div>
+        </div>
+
+        <div id="summon-result" class="summon-result hidden"></div>
+
+        <div class="summon-buttons">
+          <button id="btn-summon-1" class="summon-btn">
+            <span class="summon-label">อัญเชิญ ×1</span>
+            <span class="summon-cost">🪙 300</span>
+          </button>
+          <button id="btn-summon-10" class="summon-btn premium">
+            <span class="summon-label">อัญเชิญ ×10</span>
+            <span class="summon-cost">🪙 2,700</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ CHARACTER DETAIL ═══════════════ -->
+    <div id="screen-character" class="screen">
+      <header class="screen-header">
+        <button class="btn-back" data-goto="lobby">← กลับ</button>
+        <h1 id="char-detail-name">ตัวละคร</h1>
+      </header>
+
+      <div class="char-detail-body">
+        <div class="char-detail-top">
+          <div class="char-detail-sprite" id="char-detail-sprite"></div>
+          <div class="char-detail-info">
+            <div class="char-element" id="char-detail-element"></div>
+            <div class="char-passive" id="char-detail-passive"></div>
+          </div>
+        </div>
+
+        <div class="char-detail-stats" id="char-detail-stats"></div>
+
+        <div class="char-detail-moves">
+          <h3 class="section-title">🥋 ท่าวิชา</h3>
+          <div id="char-detail-moves-list" class="moves-list"></div>
+        </div>
+
+        <div class="char-detail-scriptures">
+          <h3 class="section-title">📜 คัมภีร์เก้าอิม</h3>
+          <div id="scripture-slots" class="scripture-slots"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="/main.js?v=sw_epic_overhaul_v2"></script>
+</body>
+
 </html>
